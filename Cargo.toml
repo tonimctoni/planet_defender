@@ -1,0 +1,6 @@
+[package]
+name = "planet_defender"
+version = "0.1.0"
+authors = ["a.bozzanoschwedhel"]
+
+[dependencies]
