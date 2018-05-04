@@ -118,15 +118,16 @@ pub trait Actor {
         keep_in_screen_vertically(pos, height);
     }
 
-    // fn move_by(&mut self, dx: f64, dy: f64){
-    //     let (width,height)=self.get_dims();
-    //     let pos=self.get_mut_pos();
+    fn move_by_speed(&mut self){
+        let (width,height)=self.get_dims();
+        let (dx,dy)=self.get_speed();
+        let pos=self.get_mut_pos();
 
-    //     pos.0+=dx;
-    //     pos.1+=dy;
+        pos.0+=dx;
+        pos.1+=dy;
 
-    //     keep_in_screen(pos, width, height)
-    // }
+        keep_in_screen(pos, width, height)
+    }
 
     fn move_horizontally_by_speed(&mut self){
         let (width,_)=self.get_dims();
