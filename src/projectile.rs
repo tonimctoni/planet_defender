@@ -21,9 +21,9 @@ impl Projectile {
         Projectile{pos: (0.,0.), width: width, height: height, angle: 0., speed: (0.,0.)}
     }
 
-    pub fn set_angle(&mut self, angle: f64){
-        self.angle=angle;
-    }
+    // pub fn set_angle(&mut self, angle: f64){ // set it using speed
+    //     self.angle=angle;
+    // }
 
     pub fn set_speed(&mut self, speed_x: f64, speed_y: f64){
         self.speed=(speed_x, speed_y);
@@ -52,3 +52,9 @@ impl Actor for Projectile {
         self.speed
     }
 }
+
+// impl Drop for Projectile {
+//     fn drop(&mut self){
+//         println!("drop");
+//     }
+// }

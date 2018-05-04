@@ -62,9 +62,11 @@ fn main() {
                             let satellite_pos=satellite.get_center();
                             if satellite_pos.1 > mouse_pos.1{
                                 let mut projectile=new_projectile();
-                                projectile.set_center(satellite_pos.0, satellite_pos.1);
-                                let speed=(satellite_pos.0-mouse_pos.0,(satellite_pos.1-mouse_pos.1));
-                                projectile.set_speed(speed.0/(speed.0+speed.1), speed.1/(speed.0+speed.1));
+                                let speed=(mouse_pos.0-satellite_pos.0,mouse_pos.1-satellite_pos.1);
+                                let speed_speed=(speed.0*speed.0+speed.1*speed.1).sqrt();
+                                let speed=(speed.0/speed_speed, speed.1/speed_speed);
+                                projectile.set_center(satellite_pos.0+speed.0*satellite.get_radius(), satellite_pos.1+speed.1*satellite.get_radius());
+                                projectile.set_speed(speed.0*4., speed.1*4.);
                                 projectiles.push(projectile);
                             }
                         },
@@ -95,6 +97,8 @@ fn main() {
         for projectile in projectiles.iter_mut(){
             projectile.move_by_speed();
         }
+
+        projectiles.retain(|p| p.is_within_screen());
 
 
         planet.draw(&mut canvas, &textures);

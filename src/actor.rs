@@ -3,30 +3,30 @@ const SCREEN_WIDTH_F64: f64 = SCREEN_WIDTH as f64;
 const SCREEN_HEIGHT_F64: f64 = SCREEN_HEIGHT as f64;
 
 
-fn keep_in_screen_horizontally(pos: &mut (f64, f64), width: f64){
-    if pos.0<0.{
-        pos.0=0.;
-    }
+// fn keep_in_screen_horizontally(pos: &mut (f64, f64), width: f64){
+//     if pos.0<0.{
+//         pos.0=0.;
+//     }
 
-    if pos.0+width>SCREEN_WIDTH_F64-1.{
-        pos.0=SCREEN_WIDTH_F64-width-1.;
-    }
-}
+//     if pos.0+width>SCREEN_WIDTH_F64-1.{
+//         pos.0=SCREEN_WIDTH_F64-width-1.;
+//     }
+// }
 
-fn keep_in_screen_vertically(pos: &mut (f64, f64), height: f64){
-    if pos.1<0.{
-        pos.1=0.;
-    }
+// fn keep_in_screen_vertically(pos: &mut (f64, f64), height: f64){
+//     if pos.1<0.{
+//         pos.1=0.;
+//     }
 
-    if pos.1+height>SCREEN_HEIGHT_F64-1.{
-        pos.1=SCREEN_HEIGHT_F64-height-1.;
-    }
-}
+//     if pos.1+height>SCREEN_HEIGHT_F64-1.{
+//         pos.1=SCREEN_HEIGHT_F64-height-1.;
+//     }
+// }
 
-fn keep_in_screen(pos: &mut (f64, f64), width: f64, height: f64){
-    keep_in_screen_horizontally(pos, width);
-    keep_in_screen_vertically(pos, height);
-}
+// fn keep_in_screen(pos: &mut (f64, f64), width: f64, height: f64){
+//     keep_in_screen_horizontally(pos, width);
+//     keep_in_screen_vertically(pos, height);
+// }
 
 // fn keep_in_screen_get_screen_collision(pos: &mut (f64, f64), width: f64, height: f64) -> bool{
 //     let mut collided=false;
@@ -90,6 +90,23 @@ pub trait Actor {
         (pos.0+dims.0/2., pos.1+dims.1/2.)
     }
 
+    fn is_within_screen(&self) -> bool{
+        let pos=self.get_pos();
+        let dims=self.get_dims();
+
+        if pos.0+dims.0<1. { // because it gets rounded down for drawing on screen
+            false
+        } else if pos.0>=SCREEN_WIDTH_F64 {
+            false
+        } else if pos.1+dims.1<1. {
+            false
+        } else if pos.1>=SCREEN_HEIGHT_F64 {
+            false
+        } else {
+            true
+        }
+    }
+
     fn set_center(&mut self, x: f64, y: f64){
         let (width,height)=self.get_dims();
         let pos=self.get_mut_pos();
@@ -97,7 +114,7 @@ pub trait Actor {
         pos.0=x-width/2.;
         pos.1=y-height/2.;
 
-        keep_in_screen(pos, width, height);
+        // keep_in_screen(pos, width, height);
     }
 
     fn set_x_center(&mut self, x: f64){
@@ -106,7 +123,7 @@ pub trait Actor {
 
         pos.0=x-width/2.;
 
-        keep_in_screen_horizontally(pos, width);
+        // keep_in_screen_horizontally(pos, width);
     }
 
     fn set_y_center(&mut self, y: f64){
@@ -115,38 +132,37 @@ pub trait Actor {
 
         pos.1=y-height/2.;
 
-        keep_in_screen_vertically(pos, height);
+        // keep_in_screen_vertically(pos, height);
     }
 
     fn move_by_speed(&mut self){
-        let (width,height)=self.get_dims();
+        // let (width,height)=self.get_dims();
         let (dx,dy)=self.get_speed();
         let pos=self.get_mut_pos();
 
         pos.0+=dx;
         pos.1+=dy;
 
-        keep_in_screen(pos, width, height)
+        // keep_in_screen(pos, width, height);
     }
 
     fn move_horizontally_by_speed(&mut self){
-        let (width,_)=self.get_dims();
+        // let (width,_)=self.get_dims();
         let (dx,_)=self.get_speed();
         let pos=self.get_mut_pos();
 
         pos.0+=dx;
 
-        keep_in_screen_horizontally(pos, width)
+        // keep_in_screen_horizontally(pos, width);
     }
 
     fn move_horizontally_by_minus_speed(&mut self){
-        let (width,_)=self.get_dims();
+        // let (width,_)=self.get_dims();
         let (dx,_)=self.get_speed();
         let pos=self.get_mut_pos();
 
         pos.0-=dx;
 
-        keep_in_screen_horizontally(pos, width)
+        // keep_in_screen_horizontally(pos, width);
     }
-
 }
