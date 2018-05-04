@@ -1,66 +1,34 @@
 extern crate sdl2;
 
-use std::path::Path;
+mod textures;
+mod planet;
+mod satellite;
+mod actor;
+mod constants;
+
+use actor::Actor;
+use constants::{SCREEN_WIDTH, SCREEN_HEIGHT};
+
+
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::image::{LoadTexture, INIT_PNG, INIT_JPG};
-use sdl2::rect::Rect;
-use sdl2::render::{Texture, TextureQuery};
-type TextureCreator = sdl2::render::TextureCreator<sdl2::video::WindowContext>;
+use sdl2::image::{INIT_PNG, INIT_JPG};
 
-
-struct Textures<'a>{
-    planet: Texture<'a>,
-    satellite: Texture<'a>,
+struct Keys {
+    left: bool,
+    right: bool
 }
 
-impl<'a> Textures<'a> {
-    fn load(texture_creator: &'a TextureCreator) -> Textures<'a>{
-        Textures{
-            planet: texture_creator.load_texture(Path::new("blender/planet.png")).unwrap(),
-            satellite: texture_creator.load_texture(Path::new("blender/dummy_satellite.png")).unwrap(),
-        }
-    }
-}
-
-struct Planet<'a> {
-    texture: &'a Texture<'a>
-}
-
-impl<'a> Planet<'a> {
-    fn new(texture: &'a Textures) -> Planet<'a>{
-        Planet{texture: &texture.planet}
-    }
-
-    fn draw(&self, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>){
-        canvas.copy(self.texture, None, None).expect("Render failed");
-    }
-}
-
-struct Satellite<'a> {
-    texture: &'a sdl2::render::Texture<'a>,
-    rect: Rect,
-}
-
-impl<'a> Satellite<'a> {
-    fn new(texture: &'a Textures) -> Satellite<'a>{
-        let TextureQuery{width,height,..}=texture.satellite.query();
-        Satellite{texture: &texture.satellite, rect: Rect::new(0,0,width,height)}
-    }
-
-    fn draw(&self, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>){
-        canvas.copy(self.texture, None, Some(self.rect)).expect("Render failed");
-    }
-}
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video = sdl_context.video().unwrap();
     let _ = sdl2::image::init(INIT_PNG | INIT_JPG).unwrap();
 
-    let window = video.window("Some Title", 1200, 800)
+    let window = video.window("Some Title", SCREEN_WIDTH, SCREEN_HEIGHT)
     .position_centered()
-    .fullscreen_desktop()
+    // .fullscreen_desktop()
+    // .fullscreen()
     .opengl()
     .build()
     .unwrap();
@@ -72,27 +40,13 @@ fn main() {
     .unwrap();
 
     let texture_creator = canvas.texture_creator();
-    let textures=Textures::load(&texture_creator);
-    let planet=Planet::new(&textures);
-    let satellite=Satellite::new(&textures);
-    // drop(canvas);
-    // let ()=texture_creator;
-    // let textures = Textures::init(&texture_creator);
+    let textures=textures::Textures::load(&texture_creator);
+    let planet=planet::Planet::new();
+    let mut satellite=satellite::Satellite::new(&textures);
+    satellite.set_center((SCREEN_WIDTH/2) as f64, SCREEN_HEIGHT as f64 - 80.);
 
-    // let texture = texture_creator.load_texture(Path::new("blender/planet.png")).unwrap();
-
-    // let mf=MeteorFactory::init(texture_creator.load_texture(Path::new("dummy_satellite.png")).unwrap());
-    // canvas.copy(&texture, None, None).expect("Render failed");
-    // canvas.present();
-
-    // drop(texture_creator);
-    // drop(window);
-
-    planet.draw(&mut canvas);
-    satellite.draw(&mut canvas);
-    canvas.present();
-    // canvas.copy(&textures.planet, None, None).expect("Render failed");
     let mut event_pump=sdl_context.event_pump().unwrap();
+    let mut keys=Keys{left: false, right: false};
     loop{
         for event in event_pump.poll_iter(){
             use Event::*;
@@ -102,11 +56,52 @@ fn main() {
                     use Keycode::*;
                     match keycode {
                         Some(Escape) => return,
+                        Some(Left) => keys.left=true,
+                        Some(Right) => keys.right=true,
                         _ => {}
                     }
                 },
+                KeyUp { keycode, .. } => {
+                    use Keycode::*;
+                    match keycode {
+                        Some(Left) => keys.left=false,
+                        Some(Right) => keys.right=false,
+                        _ => {}
+                    }
+                },
+                // MouseMotion {x,y, ..} => {
+                //     satellite.set_center(x as f64,y as f64);
+                //     // satellite.set_xmid(x);
+                //     // // satellite.set_ymid(560);
+                //     // // let dist_squared=((((SCREEN_WIDTH/2) as i32)-x)*(((SCREEN_WIDTH/2) as i32)-x)) as f64;
+                //     // let dist=(SCREEN_WIDTH as f64)/2. - (x as f64);
+                //     // let dist_squared=dist*dist;
+                //     // // println!("{:?}", (360000.-dist_squared));
+                //     // let height=(SCREEN_HEIGHT as f64)-(360000.-dist_squared).sqrt();
+
+                //     // println!("{:?}", x);
+                //     // satellite.set_ymid(height as i32);
+                // },
                 _ => {},
             }
         }
+
+        if keys.left{
+            satellite.move_by_minus_speed();
+        }
+
+        if keys.right{
+            satellite.move_by_speed();
+        }
+
+        // planet.draw(&mut canvas);
+        // satellite.draw(&mut canvas);
+        planet.draw(&mut canvas, &textures);
+        satellite.draw(&mut canvas, &textures);
+        canvas.present();
     }
 }
+
+// x**2 + y**2 == r
+
+// y == sqrt(r - x**2)
