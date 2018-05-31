@@ -106,6 +106,20 @@ pub trait Actor {
         }
     }
 
+    fn is_colliding_with_circle(&self, other: &Actor) -> bool{
+        let (self_center_x, self_center_y)=self.get_center();
+        let (other_center_x, other_center_y)=other.get_center();
+
+        let x_distance=self_center_x-other_center_x;//may be negative
+        let y_distance=self_center_y-other_center_y;//may be negative
+        let added_radii=self.get_radius()+other.get_radius();
+
+        let distance_squared=x_distance*x_distance+y_distance*y_distance;
+        let darii_squared=added_radii*added_radii;
+
+        distance_squared < darii_squared
+    }
+
     fn set_pos(&mut self, x: f64, y: f64){
         let pos=self.get_mut_pos();
 

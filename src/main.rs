@@ -81,3 +81,13 @@ fn main() {
         canvas.present();
     }
 }
+
+
+
+// Maybe add life bars to meteors that don't have full hp
+// a2+b2=c2
+// a2+a2=c2
+// 2(a2)=c2
+// a2=(c2)/2
+// a=sqrt(c2)/sqrt(2)
+// a=c/sqrt(2)
