@@ -52,9 +52,3 @@ impl Actor for Projectile {
         self.speed
     }
 }
-
-// impl Drop for Projectile {
-//     fn drop(&mut self){
-//         println!("drop");
-//     }
-// }

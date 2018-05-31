@@ -1,6 +1,5 @@
-use constants::{SCREEN_WIDTH, SCREEN_HEIGHT};
-const SCREEN_WIDTH_F64: f64 = SCREEN_WIDTH as f64;
-const SCREEN_HEIGHT_F64: f64 = SCREEN_HEIGHT as f64;
+use constants::{SCREEN_WIDTH_F64, SCREEN_HEIGHT_F64};
+// use constants::{SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH_F64, SCREEN_HEIGHT_F64};
 
 
 // fn keep_in_screen_horizontally(pos: &mut (f64, f64), width: f64){
@@ -107,14 +106,19 @@ pub trait Actor {
         }
     }
 
+    fn set_pos(&mut self, x: f64, y: f64){
+        let pos=self.get_mut_pos();
+
+        pos.0=x;
+        pos.1=y;
+    }
+
     fn set_center(&mut self, x: f64, y: f64){
         let (width,height)=self.get_dims();
         let pos=self.get_mut_pos();
 
         pos.0=x-width/2.;
         pos.1=y-height/2.;
-
-        // keep_in_screen(pos, width, height);
     }
 
     fn set_x_center(&mut self, x: f64){
@@ -122,8 +126,6 @@ pub trait Actor {
         let pos=self.get_mut_pos();
 
         pos.0=x-width/2.;
-
-        // keep_in_screen_horizontally(pos, width);
     }
 
     fn set_y_center(&mut self, y: f64){
@@ -131,38 +133,34 @@ pub trait Actor {
         let pos=self.get_mut_pos();
 
         pos.1=y-height/2.;
-
-        // keep_in_screen_vertically(pos, height);
     }
 
     fn move_by_speed(&mut self){
-        // let (width,height)=self.get_dims();
         let (dx,dy)=self.get_speed();
         let pos=self.get_mut_pos();
 
         pos.0+=dx;
         pos.1+=dy;
-
-        // keep_in_screen(pos, width, height);
     }
 
     fn move_horizontally_by_speed(&mut self){
-        // let (width,_)=self.get_dims();
         let (dx,_)=self.get_speed();
         let pos=self.get_mut_pos();
 
         pos.0+=dx;
-
-        // keep_in_screen_horizontally(pos, width);
     }
 
     fn move_horizontally_by_minus_speed(&mut self){
-        // let (width,_)=self.get_dims();
         let (dx,_)=self.get_speed();
         let pos=self.get_mut_pos();
 
         pos.0-=dx;
+    }
 
-        // keep_in_screen_horizontally(pos, width);
+    fn move_vertically_by_speed(&mut self){
+        let (_,dy)=self.get_speed();
+        let pos=self.get_mut_pos();
+
+        pos.1+=dy;
     }
 }

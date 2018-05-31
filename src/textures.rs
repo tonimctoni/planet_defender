@@ -8,6 +8,7 @@ pub struct Textures<'a>{
     pub planet: Texture<'a>,
     pub satellite: Texture<'a>,
     pub projectile: Texture<'a>,
+    pub meteor: Texture<'a>,
 }
 
 impl<'a> Textures<'a> {
@@ -16,6 +17,7 @@ impl<'a> Textures<'a> {
             planet: texture_creator.load_texture(Path::new("blender/planet.png")).unwrap(),
             satellite: texture_creator.load_texture(Path::new("blender/dummy_satellite.png")).unwrap(),
             projectile: texture_creator.load_texture(Path::new("blender/dummy_projectile.png")).unwrap(),
+            meteor: texture_creator.load_texture(Path::new("blender/meteor01.png")).unwrap(),
         }
     }
 }

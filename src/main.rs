@@ -1,15 +1,16 @@
 extern crate sdl2;
+extern crate rand;
 
 mod textures;
-mod planet;
 mod satellite;
 mod actor;
 mod constants;
-mod timer_manager;
+mod timer;
 mod projectile;
+mod meteor;
+mod actor_manager;
 
-use actor::Actor;
-use constants::{SCREEN_WIDTH, SCREEN_HEIGHT, SHIP_EPSILON};
+use constants::{SCREEN_WIDTH, SCREEN_HEIGHT};
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -36,17 +37,13 @@ fn main() {
     .build()
     .unwrap();
 
-    let mut timer_manager=timer_manager::TimerManager::init(timer);
+    let mut timer=timer::Timer::init(timer);
 
     let texture_creator = canvas.texture_creator();
     let textures=textures::Textures::load(&texture_creator);
-    let planet=planet::Planet::new();
-    let mut satellite=satellite::Satellite::new(&textures);
-    satellite.set_center((SCREEN_WIDTH/2) as f64, SCREEN_HEIGHT as f64 - 160.);
+    let mut actor_manager=actor_manager::ActorManager::init(&textures);
 
     let mut mouse_pos=(0f64, 0f64);
-    let mut projectiles: Vec<projectile::Projectile>=Vec::new();
-    let new_projectile=||{projectile::Projectile::new(&textures)};
 
     let mut event_pump=sdl_context.event_pump().unwrap();
     loop{
@@ -59,16 +56,10 @@ fn main() {
                     match keycode {
                         Some(Escape) => return,
                         Some(Q) => {
-                            let satellite_pos=satellite.get_center();
-                            if satellite_pos.1 > mouse_pos.1{
-                                let mut projectile=new_projectile();
-                                let speed=(mouse_pos.0-satellite_pos.0,mouse_pos.1-satellite_pos.1);
-                                let speed_speed=(speed.0*speed.0+speed.1*speed.1).sqrt();
-                                let speed=(speed.0/speed_speed, speed.1/speed_speed);
-                                projectile.set_center(satellite_pos.0+speed.0*satellite.get_radius(), satellite_pos.1+speed.1*satellite.get_radius());
-                                projectile.set_speed(speed.0*4., speed.1*4.);
-                                projectiles.push(projectile);
-                            }
+                            actor_manager.shoot_projectile(mouse_pos, &textures);
+                        },
+                        Some(E) => {
+                            actor_manager.drop_meteor(&textures);
                         },
                         _ => {}
                     }
@@ -80,31 +71,13 @@ fn main() {
             }
         }
 
-        let satellite_direction=mouse_pos.0-satellite.get_x_center();
-        if satellite_direction.abs()>SHIP_EPSILON{
-            if satellite_direction > 0.{
-                satellite.move_horizontally_by_speed();
-            } else if satellite_direction < 0.{
-                satellite.move_horizontally_by_minus_speed();
-            }
-        }
+        // Actor logic that is not a response to an event
+        actor_manager.step(mouse_pos);
 
-        let satellite_pos=satellite.get_center();
-        let gradient=-(mouse_pos.0 - satellite_pos.0)/(mouse_pos.1 - satellite_pos.1);
-        let angle=gradient.atan()*180./std::f64::consts::PI;
-        satellite.set_angle(angle);
-
-        for projectile in projectiles.iter_mut(){
-            projectile.move_by_speed();
-        }
-
-        projectiles.retain(|p| p.is_within_screen());
-
-
-        planet.draw(&mut canvas, &textures);
-        projectiles.iter().for_each(|projectile| projectile.draw(&mut canvas, &textures));
-        satellite.draw(&mut canvas, &textures);
-        timer_manager.cap_fps();
+        // Draw
+        canvas.copy(&textures.planet, None, None).expect("Render failed");
+        actor_manager.draw(&mut canvas, &textures);
+        timer.cap_fps();
         canvas.present();
     }
 }

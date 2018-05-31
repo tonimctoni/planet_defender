@@ -1,15 +1,15 @@
 use sdl2::TimerSubsystem;
 
 
-pub struct TimerManager {
+pub struct Timer {
     timer: TimerSubsystem,
     last: u32
 }
 
-impl TimerManager {
-    pub fn init(mut timer: TimerSubsystem) -> TimerManager {
+impl Timer {
+    pub fn init(mut timer: TimerSubsystem) -> Timer {
         let last=timer.ticks();
-        TimerManager{timer: timer, last: last}
+        Timer{timer: timer, last: last}
     }
 
     pub fn cap_fps(&mut self){
