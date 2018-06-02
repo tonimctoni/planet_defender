@@ -3,6 +3,7 @@ use textures;
 use sdl2::render::TextureQuery;
 use actor::Actor;
 use sdl2::rect::Rect;
+use constants::ProjectileKind;
 type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 
 
@@ -12,26 +13,38 @@ pub struct Projectile {
     width: u32,
     height: u32,
     angle: f64,
-    speed: (f64,f64)
+    speed: (f64,f64),
+    kind: ProjectileKind,
 }
 
 impl Projectile {
-    pub fn new(textures: &textures::Textures) -> Projectile{
-        let TextureQuery{width,height,..}=textures.projectile.query();
-        Projectile{pos: (0.,0.), width: width, height: height, angle: 0., speed: (0.,0.)}
+    pub fn new(textures: &textures::Textures, kind: ProjectileKind, velocity: (f64, f64)) -> Projectile{
+        let TextureQuery{width,height,..}=textures.projectiles[kind.get_ptexture_i()].query();
+        let speed=kind.get_speed();
+
+        Projectile{
+            pos: (0.,0.),
+            width: width,
+            height: height,
+            angle: 0.,
+            speed: (speed*velocity.0,speed*velocity.1),
+            kind}
     }
 
-    // pub fn set_angle(&mut self, angle: f64){ // set it using speed
-    //     self.angle=angle;
-    // }
+    pub fn get_damage(&self) -> f64{
+        self.kind.get_damage()
+    }
 
-    pub fn set_speed(&mut self, speed_x: f64, speed_y: f64){
-        self.speed=(speed_x, speed_y);
+    pub fn is_kind(&self, kind: ProjectileKind) -> bool{
+        self.kind==kind
     }
 
     pub fn draw(&self, canvas: &mut Canvas, textures: &textures::Textures){
-        // canvas.copy(&textures.Projectile, None, Some(Rect::new(self.pos.0 as i32, self.pos.1 as i32, self.width, self.height))).expect("Render failed");
-        canvas.copy_ex(&textures.projectile, None, Some(Rect::new(self.pos.0 as i32, self.pos.1 as i32, self.width, self.height)), self.angle, None, false, false).expect("Render failed");
+        if self.angle==0.{
+            canvas.copy(&textures.projectiles[self.kind.get_ptexture_i()], None, Some(Rect::new(self.pos.0 as i32, self.pos.1 as i32, self.width, self.height))).expect("Render failed");
+        } else {
+            canvas.copy_ex(&textures.projectiles[self.kind.get_ptexture_i()], None, Some(Rect::new(self.pos.0 as i32, self.pos.1 as i32, self.width, self.height)), self.angle, None, false, false).expect("Render failed");
+        }
         // canvas.set_draw_color(Color::RGB(255, 0, 0));
         // canvas.draw_rect(Rect::new(self.pos.0 as i32, self.pos.1 as i32, self.width, self.height)).expect("Render failed");
         // let radius=((self.width+self.height) as f64)/4.;

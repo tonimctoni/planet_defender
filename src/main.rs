@@ -9,8 +9,11 @@ mod timer;
 mod projectile;
 mod meteor;
 mod actor_manager;
+mod energy_meter;
+mod game_events;
 
-use constants::{SCREEN_WIDTH, SCREEN_HEIGHT};
+
+use constants::{SCREEN_WIDTH, SCREEN_HEIGHT, ProjectileKind};
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -44,6 +47,11 @@ fn main() {
     let mut actor_manager=actor_manager::ActorManager::init(&textures);
 
     let mut mouse_pos=(0f64, 0f64);
+    let mut paused=false;
+    let mut energy_meter=energy_meter::EnergyMeter::new();
+    let mut game_events=game_events::GameEvents::new();
+    let mut pressed_q=false;
+    let mut pressed_w=false;
 
     let mut event_pump=sdl_context.event_pump().unwrap();
     loop{
@@ -56,10 +64,25 @@ fn main() {
                     match keycode {
                         Some(Escape) => return,
                         Some(Q) => {
-                            actor_manager.shoot_projectile(mouse_pos, &textures);
+                            pressed_q=true;
                         },
-                        Some(E) => {
-                            actor_manager.drop_meteor(&textures);
+                        Some(W) => {
+                            pressed_w=true;
+                        },
+                        Some(P) => {
+                            paused=!paused;
+                        },
+                        _ => {}
+                    }
+                },
+                KeyUp { keycode, .. } => {
+                    use Keycode::*;
+                    match keycode {
+                        Some(Q) => {
+                            pressed_q=false;
+                        },
+                        Some(W) => {
+                            pressed_w=false;
                         },
                         _ => {}
                     }
@@ -71,12 +94,30 @@ fn main() {
             }
         }
 
-        // Actor logic that is not a response to an event
-        actor_manager.step(mouse_pos);
+        if !paused{
+            // Manage keys in pressed state
+            if pressed_q{
+                let kind=ProjectileKind::P01;
+                if energy_meter.consume(kind.get_energy_cost()){
+                    actor_manager.shoot_projectile(mouse_pos, &textures, kind);
+                }
+            } else if pressed_w{
+                let kind=ProjectileKind::P02;
+                if energy_meter.consume(kind.get_energy_cost()){
+                    actor_manager.shoot_projectile(mouse_pos, &textures, kind);
+                }
+            }
+
+            // Actor logic that is not a response to an event
+            actor_manager.step(mouse_pos, &textures);
+            energy_meter.step();
+            game_events.step(&mut actor_manager, &textures);
+        }
 
         // Draw
         canvas.copy(&textures.planet, None, None).expect("Render failed");
         actor_manager.draw(&mut canvas, &textures);
+        energy_meter.draw(&mut canvas);
         timer.cap_fps();
         canvas.present();
     }
@@ -85,9 +126,8 @@ fn main() {
 
 
 // Maybe add life bars to meteors that don't have full hp
-// a2+b2=c2
-// a2+a2=c2
-// 2(a2)=c2
-// a2=(c2)/2
-// a=sqrt(c2)/sqrt(2)
-// a=c/sqrt(2)
+// import numpy as np
+// def sc(n):
+//     n*=np.pi/180.
+//     return np.cos(n), np.sin(n)
+// Fancy the energy meter up

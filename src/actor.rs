@@ -106,7 +106,8 @@ pub trait Actor {
         }
     }
 
-    fn is_colliding_with_circle(&self, other: &Actor) -> bool{
+    fn is_colliding_with_circle<T: Actor>(&self, other: &T) -> bool{
+    // fn is_colliding_with_circle(&self, other: &Actor) -> bool{
         let (self_center_x, self_center_y)=self.get_center();
         let (other_center_x, other_center_y)=other.get_center();
 
