@@ -12,7 +12,7 @@ pub const SHIP_SPEED: f64 = 4.;
 pub const ENERGY_RECOVERY_PER_FRAME: f64 = 0.002;
 pub const COOLDOWN_FRAMES: isize = 10;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum ProjectileKind {
     P01,
     P02,

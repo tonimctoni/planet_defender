@@ -1,7 +1,8 @@
 use sdl2;
 use sdl2::rect::Rect;
 use sdl2::pixels::Color;
-use constants::{SCREEN_HEIGHT_F64, ENERGY_RECOVERY_PER_FRAME, COOLDOWN_FRAMES};
+use textures::Textures;
+use constants::{SCREEN_HEIGHT, ENERGY_RECOVERY_PER_FRAME, COOLDOWN_FRAMES};
 type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 
 
@@ -11,6 +12,7 @@ type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 pub struct EnergyMeter{
     energy: f64,
     cd: isize,
+    triple_shot: bool,
 }
 
 
@@ -19,11 +21,22 @@ impl EnergyMeter {
         // EnergyMeter(1.)
         EnergyMeter{
             energy: 1.,
-            cd: 0
+            cd: 0,
+            triple_shot: false,
         }
     }
 
+    pub fn set_triple_shot(&mut self, triple_shot: bool){
+        self.triple_shot=triple_shot;
+    }
+
     pub fn step(&mut self){
+        // if self.triple_shot{
+        //     self.energy+=ENERGY_RECOVERY_PER_FRAME/2.;
+        // } else{
+        //     self.energy+=ENERGY_RECOVERY_PER_FRAME;
+        // }
+
         self.energy+=ENERGY_RECOVERY_PER_FRAME;
         if self.energy>1.{
             self.energy=1.
@@ -45,9 +58,19 @@ impl EnergyMeter {
         }
     }
 
-    pub fn draw(&self, canvas: &mut Canvas){
-        let energy_rect=Rect::new(0, ((1.-self.energy)*SCREEN_HEIGHT_F64) as i32, 20, (self.energy*SCREEN_HEIGHT_F64) as u32);
-        canvas.set_draw_color(Color::RGB(((1.-self.energy)*200.) as u8+55, (self.energy*200.) as u8+55, 0));
+    pub fn draw(&self, canvas: &mut Canvas, textures: &Textures){
+        let pos_x=(SCREEN_HEIGHT as i32)/2-200;
+        let bar_height=(self.energy*292.) as u32;
+        let energy_rect=Rect::new(2, pos_x+54+(292-bar_height) as i32, 45, bar_height as u32);
+
+        if self.triple_shot{
+            canvas.set_draw_color(Color::RGB(150,50,0));
+        } else {
+            canvas.set_draw_color(Color::RGB(50,100,0));
+        }
+
         canvas.fill_rect(energy_rect).expect("Render failed");
+        canvas.copy(&textures.energy_meter_flask, None, Some(Rect::new(0,pos_x,50,400))).expect("Render failed");
+        canvas.copy(&textures.energy_meter_holder, None, Some(Rect::new(0,pos_x,50,400))).expect("Render failed");
     }
 }

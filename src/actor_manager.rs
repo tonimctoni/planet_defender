@@ -15,9 +15,9 @@ type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 pub struct ActorManager {
     satellite: Satellite,
     projectiles: Vec<Projectile>,
-    // Wprojectiles: Vec<Projectile>,
     meteors: Vec<Meteor>,
     rng: XorShiftRng,
+    triple_shot: bool,
 }
 
 
@@ -28,10 +28,14 @@ impl ActorManager {
         ActorManager{
             satellite: satellite,
             projectiles: Vec::with_capacity(64),
-            // projectiles: Vec::with_capacity(64),
             meteors: Vec::with_capacity(64),
-            rng: XorShiftRng::from_seed([100,2,3,4])
+            rng: XorShiftRng::from_seed([100,2,3,4]),
+            triple_shot: false
         }
+    }
+
+    pub fn set_triple_shot(&mut self, triple_shot: bool){
+        self.triple_shot=triple_shot;
     }
 
     pub fn shoot_projectile(&mut self, mouse_pos: (f64, f64), textures: &Textures, projectile_kind: ProjectileKind){
@@ -44,8 +48,19 @@ impl ActorManager {
 
             let mut projectile=Projectile::new(&textures, projectile_kind, velocity);
             projectile.set_center(satellite_pos.0+velocity.0*self.satellite.get_radius(), satellite_pos.1+velocity.1*self.satellite.get_radius());
-            // projectile.set_speed(speed.0*5., speed.1*5.);
             self.projectiles.push(projectile);
+
+            if self.triple_shot{
+                for r in [
+                ((0.98480775301220802, -0.17364817766693033), (0.17364817766693033, 0.98480775301220802)),
+                ((0.98480775301220802, 0.17364817766693033), (-0.17364817766693033, 0.98480775301220802))
+                ].iter(){
+                    let velocity=(velocity.0*(r.0).0+velocity.1*(r.0).1, velocity.0*(r.1).0+velocity.1*(r.1).1);
+                    let mut projectile=Projectile::new(&textures, projectile_kind, velocity);
+                    projectile.set_center(satellite_pos.0+velocity.0*self.satellite.get_radius(), satellite_pos.1+velocity.1*self.satellite.get_radius());
+                    self.projectiles.push(projectile);
+                }
+            }
         }
     }
 

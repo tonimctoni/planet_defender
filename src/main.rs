@@ -43,7 +43,10 @@ fn main() {
     let mut timer=timer::Timer::init(timer);
 
     let texture_creator = canvas.texture_creator();
+    // canvas.set_blend_mode(sdl2::render::BlendMode::Blend);
+    // println!("{:?}", canvas.blend_mode());
     let textures=textures::Textures::load(&texture_creator);
+    // println!("{:?}", textures.energy_meter.blend_mode());
     let mut actor_manager=actor_manager::ActorManager::init(&textures);
 
     let mut mouse_pos=(0f64, 0f64);
@@ -52,6 +55,7 @@ fn main() {
     let mut game_events=game_events::GameEvents::new();
     let mut pressed_q=false;
     let mut pressed_w=false;
+    let mut pressedt_=false;
 
     let mut event_pump=sdl_context.event_pump().unwrap();
     loop{
@@ -69,6 +73,9 @@ fn main() {
                         Some(W) => {
                             pressed_w=true;
                         },
+                        Some(T) => {
+                            pressedt_=true;
+                        },
                         Some(P) => {
                             paused=!paused;
                         },
@@ -83,6 +90,9 @@ fn main() {
                         },
                         Some(W) => {
                             pressed_w=false;
+                        },
+                        Some(T) => {
+                            pressedt_=false;
                         },
                         _ => {}
                     }
@@ -106,18 +116,24 @@ fn main() {
                 if energy_meter.consume(kind.get_energy_cost()){
                     actor_manager.shoot_projectile(mouse_pos, &textures, kind);
                 }
+            } else if pressedt_{
+                if energy_meter.consume(1.){
+                    actor_manager.set_triple_shot(true);
+                    energy_meter.set_triple_shot(true);
+                    game_events.sched_disable_triple_shot();
+                }
             }
 
             // Actor logic that is not a response to an event
             actor_manager.step(mouse_pos, &textures);
             energy_meter.step();
-            game_events.step(&mut actor_manager, &textures);
+            game_events.step(&mut actor_manager, &mut energy_meter, &textures);
         }
 
         // Draw
         canvas.copy(&textures.planet, None, None).expect("Render failed");
         actor_manager.draw(&mut canvas, &textures);
-        energy_meter.draw(&mut canvas);
+        energy_meter.draw(&mut canvas, &textures);
         timer.cap_fps();
         canvas.present();
     }
@@ -125,9 +141,10 @@ fn main() {
 
 
 
-// Maybe add life bars to meteors that don't have full hp
 // import numpy as np
 // def sc(n):
 //     n*=np.pi/180.
 //     return np.cos(n), np.sin(n)
-// Fancy the energy meter up
+//     return ((np.cos(n), -np.sin(n)),(np.sin(n), np.cos(n)))
+// Projectile that kills everything, continues on after impact and travels fast (10 or so)
+// Projectile that creates an explosion/black hole that kills meteors on impact
