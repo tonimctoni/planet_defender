@@ -28,9 +28,8 @@ fn main() {
 
     let window = video.window("Some Title", SCREEN_WIDTH, SCREEN_HEIGHT)
     .position_centered()
-    // .fullscreen_desktop()
-    // .fullscreen()
-    .opengl()
+    .fullscreen()
+    // .opengl()
     .build()
     .unwrap();
 
@@ -43,10 +42,7 @@ fn main() {
     let mut timer=timer::Timer::init(timer);
 
     let texture_creator = canvas.texture_creator();
-    // canvas.set_blend_mode(sdl2::render::BlendMode::Blend);
-    // println!("{:?}", canvas.blend_mode());
     let textures=textures::Textures::load(&texture_creator);
-    // println!("{:?}", textures.energy_meter.blend_mode());
     let mut actor_manager=actor_manager::ActorManager::init(&textures);
 
     let mut mouse_pos=(0f64, 0f64);
