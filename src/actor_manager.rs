@@ -8,7 +8,11 @@ use actor::Actor;
 use constants::ProjectileKind;
 use textures::Textures;
 use rand::{XorShiftRng, SeedableRng, Rng};
-use constants::{SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH_F64, SCREEN_HEIGHT_F64, SHIP_EPSILON};
+use constants::{
+    SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH_F64,
+    SHIP_EPSILON, PELLET_VELOCITY, TRIPLE_SHOT_ROTATIONS,
+    OUT_OF_SCREEN_X_F64, OUT_OF_SCREEN_Y_F64
+};
 type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 
 
@@ -38,6 +42,10 @@ impl ActorManager {
         self.triple_shot=triple_shot;
     }
 
+    pub fn set_shield(&mut self, shield: bool){
+        self.satellite.set_shield(shield);
+    }
+
     pub fn shoot_projectile(&mut self, mouse_pos: (f64, f64), textures: &Textures, projectile_kind: ProjectileKind){
         let satellite_pos=self.satellite.get_center();
         if satellite_pos.1 > mouse_pos.1{
@@ -51,11 +59,8 @@ impl ActorManager {
             self.projectiles.push(projectile);
 
             if self.triple_shot{
-                for r in [
-                ((0.98480775301220802, -0.17364817766693033), (0.17364817766693033, 0.98480775301220802)),
-                ((0.98480775301220802, 0.17364817766693033), (-0.17364817766693033, 0.98480775301220802))
-                ].iter(){
-                    let velocity=(velocity.0*(r.0).0+velocity.1*(r.0).1, velocity.0*(r.1).0+velocity.1*(r.1).1);
+                for rotation in TRIPLE_SHOT_ROTATIONS.iter(){
+                    let velocity=(velocity.0*(rotation.0).0+velocity.1*(rotation.0).1, velocity.0*(rotation.1).0+velocity.1*(rotation.1).1);
                     let mut projectile=Projectile::new(&textures, projectile_kind, velocity);
                     projectile.set_center(satellite_pos.0+velocity.0*self.satellite.get_radius(), satellite_pos.1+velocity.1*self.satellite.get_radius());
                     self.projectiles.push(projectile);
@@ -101,20 +106,10 @@ impl ActorManager {
             for meteor in self.meteors.iter_mut(){
                 if projectile.is_colliding_with_circle(meteor){
                     if meteor.damage(projectile.get_damage()){
-                        meteor.set_pos(SCREEN_WIDTH_F64+10000., SCREEN_HEIGHT_F64+10000.);
+                        meteor.set_pos(OUT_OF_SCREEN_X_F64, OUT_OF_SCREEN_Y_F64);
                         if projectile.is_kind(ProjectileKind::P02){
                             let projectile_center=projectile.get_center();
-                            for velocity in [
-                                (-0.64278760968653936, -0.76604444311897801),
-                                (-0.49999999999999978, -0.86602540378443871),
-                                (-0.34202014332566871, -0.93969262078590843),
-                                (-0.1736481776669303, -0.98480775301220802),
-                                (6.123233995736766e-17, -1.0),
-                                (0.17364817766693041, -0.98480775301220802),
-                                (0.34202014332566882, -0.93969262078590832),
-                                (0.50000000000000011, -0.8660254037844386),
-                                (0.64278760968653936, -0.76604444311897801),
-                            ].iter(){
+                            for velocity in PELLET_VELOCITY.iter(){
                                 let mut projectile=Projectile::new(&textures, ProjectileKind::P03, *velocity);
                                 projectile.set_center(
                                     projectile_center.0,
@@ -124,11 +119,20 @@ impl ActorManager {
                             }
                         }
                     }
-                    projectile.set_pos(SCREEN_WIDTH_F64+10000., SCREEN_HEIGHT_F64+10000.);
+                    projectile.set_pos(OUT_OF_SCREEN_X_F64, OUT_OF_SCREEN_Y_F64);
                 }
             }
         }
         self.projectiles.append(&mut pellets);
+
+        // If shield is active, destroy meteors that collide with it
+        if self.satellite.get_shield(){
+            for meteor in self.meteors.iter_mut(){
+                if self.satellite.is_colliding_with_circle(meteor){
+                    meteor.set_pos(OUT_OF_SCREEN_X_F64, OUT_OF_SCREEN_Y_F64);
+                }
+            }
+        }
 
         // Move each projectile according to speed
         for projectile in self.projectiles.iter_mut(){

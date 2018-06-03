@@ -39,21 +39,11 @@ impl Meteor {
         canvas.copy_ex(&textures.meteor, None, Some(Rect::new(self.pos.0 as i32, self.pos.1 as i32, self.width, self.height)), self.angle, None, false, false).expect("Render failed");
         if self.hp!=self.max_hp{
             let proportion_hp=self.hp/self.max_hp;
-            // let bk_rect=Rect::new(self.pos.0 as i32, self.pos.1 as i32, self.width, 6);
             let hp_rect=Rect::new(self.pos.0 as i32+1, self.pos.1 as i32+1, (((self.width-2) as f64)*proportion_hp) as u32, 4);
-
-            // canvas.set_draw_color(Color::RGB(0, 150, 0));
-            // canvas.draw_rect(bk_rect).expect("Render failed");
             let h=proportion_hp*proportion_hp;
             canvas.set_draw_color(Color::RGB(((1.-h)*255.) as u8, (h*255.) as u8, 0));
             canvas.fill_rect(hp_rect).expect("Render failed");
         }
-        // canvas.set_draw_color(Color::RGB(255, 0, 0));
-        // canvas.draw_rect(Rect::new(self.pos.0 as i32, self.pos.1 as i32, self.width, self.height)).expect("Render failed");
-        // let radius=((self.width+self.height) as f64)/4.;
-        // let inner=radius/((2f64).sqrt());
-        // let (xcenter, ycenter)=self.get_center();
-        // canvas.draw_rect(Rect::new((xcenter-inner) as i32, (ycenter-inner) as i32, (inner*2.) as u32, (inner*2.) as u32)).expect("Render failed");
     }
 }
 

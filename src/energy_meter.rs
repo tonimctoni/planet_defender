@@ -6,9 +6,6 @@ use constants::{SCREEN_HEIGHT, ENERGY_RECOVERY_PER_FRAME, COOLDOWN_FRAMES};
 type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 
 
-
-
-// pub struct EnergyMeter(f64);
 pub struct EnergyMeter{
     energy: f64,
     cd: isize,
@@ -18,7 +15,6 @@ pub struct EnergyMeter{
 
 impl EnergyMeter {
     pub fn new() -> EnergyMeter{
-        // EnergyMeter(1.)
         EnergyMeter{
             energy: 1.,
             cd: 0,
@@ -64,7 +60,7 @@ impl EnergyMeter {
         let energy_rect=Rect::new(2, pos_x+54+(292-bar_height) as i32, 45, bar_height as u32);
 
         if self.triple_shot{
-            canvas.set_draw_color(Color::RGB(150,50,0));
+            canvas.set_draw_color(Color::RGB(200,50,0));
         } else {
             canvas.set_draw_color(Color::RGB(50,100,0));
         }

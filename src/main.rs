@@ -13,7 +13,7 @@ mod energy_meter;
 mod game_events;
 
 
-use constants::{SCREEN_WIDTH, SCREEN_HEIGHT, ProjectileKind};
+use constants::{SCREEN_WIDTH, SCREEN_HEIGHT, ProjectileKind, SHIELD_ENERGY_COST, TRIPLE_SHOT_ENERGY_COST};
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -56,6 +56,7 @@ fn main() {
     let mut pressed_q=false;
     let mut pressed_w=false;
     let mut pressedt_=false;
+    let mut pressed_r=false;
 
     let mut event_pump=sdl_context.event_pump().unwrap();
     loop{
@@ -76,6 +77,9 @@ fn main() {
                         Some(T) => {
                             pressedt_=true;
                         },
+                        Some(R) => {
+                            pressed_r=true;
+                        },
                         Some(P) => {
                             paused=!paused;
                         },
@@ -93,6 +97,9 @@ fn main() {
                         },
                         Some(T) => {
                             pressedt_=false;
+                        },
+                        Some(R) => {
+                            pressed_r=false;
                         },
                         _ => {}
                     }
@@ -116,8 +123,13 @@ fn main() {
                 if energy_meter.consume(kind.get_energy_cost()){
                     actor_manager.shoot_projectile(mouse_pos, &textures, kind);
                 }
+            } else if pressed_r{
+                if energy_meter.consume(SHIELD_ENERGY_COST){
+                    actor_manager.set_shield(true);
+                    game_events.sched_disable_shield();
+                }
             } else if pressedt_{
-                if energy_meter.consume(1.){
+                if energy_meter.consume(TRIPLE_SHOT_ENERGY_COST){
                     actor_manager.set_triple_shot(true);
                     energy_meter.set_triple_shot(true);
                     game_events.sched_disable_triple_shot();
@@ -148,3 +160,5 @@ fn main() {
 //     return ((np.cos(n), -np.sin(n)),(np.sin(n), np.cos(n)))
 // Projectile that kills everything, continues on after impact and travels fast (10 or so)
 // Projectile that creates an explosion/black hole that kills meteors on impact
+// Remove magic numbers
+// If possible add a border to energy_meter_flask
