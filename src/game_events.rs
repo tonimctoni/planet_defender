@@ -2,6 +2,7 @@
 use actor_manager::ActorManager;
 use energy_meter::EnergyMeter;
 use textures::Textures;
+use constants::MeteorKind;
 use constants::{TRIPLE_SHOT_DURATION_FRAMES, SHIELD_DURATION_FRAMES};
 
 
@@ -32,8 +33,12 @@ impl GameEvents {
 
     pub fn step(&mut self, actor_manager: &mut ActorManager, energy_meter: &mut EnergyMeter, textures: &Textures){
         self.step+=1;
-        if self.step%(60*2)==0{
-            actor_manager.drop_meteor(&textures);
+        if self.step%(60*13)==0{
+            actor_manager.drop_meteor(&textures, MeteorKind::M03);
+        } else if self.step%(60*5)==0{
+            actor_manager.drop_meteor(&textures, MeteorKind::M02);
+        } else if self.step%(60*2)==0{
+            actor_manager.drop_meteor(&textures, MeteorKind::M01);
         }
 
         if self.triple_shot!=0{

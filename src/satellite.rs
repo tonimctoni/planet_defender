@@ -3,7 +3,7 @@ use sdl2::render::TextureQuery;
 use actor::Actor;
 use sdl2::rect::Rect;
 use textures::Textures;
-use constants::SHIP_SPEED;
+use constants::{SHIP_SPEED, SHIP_WITH_SHIELD_SPEED};
 type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 
 
@@ -65,7 +65,11 @@ impl Actor for Satellite {
     }
 
     fn get_speed(&self) -> (f64, f64){
-        (SHIP_SPEED,0.)
+        if self.shield{
+            (SHIP_WITH_SHIELD_SPEED,0.)
+        } else{
+            (SHIP_SPEED,0.)
+        }
     }
 
     fn get_radius(&self) -> f64{

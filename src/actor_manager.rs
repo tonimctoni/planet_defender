@@ -5,9 +5,9 @@ use satellite::Satellite;
 use projectile::Projectile;
 use meteor::Meteor;
 use actor::Actor;
-use constants::ProjectileKind;
 use textures::Textures;
 use rand::{XorShiftRng, SeedableRng, Rng};
+use constants::{ProjectileKind, MeteorKind};
 use constants::{
     SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH_F64,
     SHIP_EPSILON, PELLET_VELOCITY, TRIPLE_SHOT_ROTATIONS,
@@ -69,8 +69,8 @@ impl ActorManager {
         }
     }
 
-    pub fn drop_meteor(&mut self, textures: &Textures){ // Add another parameter with type of meteor when more are available // Make sure it does not collide
-        let mut meteor=Meteor::new(textures);
+    pub fn drop_meteor(&mut self, textures: &Textures, meteor_kind: MeteorKind){
+        let mut meteor=Meteor::new(textures, meteor_kind);
         let meteor_width=meteor.get_dims().0;
         meteor.set_pos(self.rng.next_f64()*(SCREEN_WIDTH_F64-meteor_width), 0.);
         for o_meteor in self.meteors.iter(){
@@ -78,7 +78,6 @@ impl ActorManager {
                 return
             }
         }
-        meteor.set_speed(1.);
         meteor.set_angle(self.rng.next_f64()*360.);
         self.meteors.push(meteor);
     }
@@ -99,6 +98,17 @@ impl ActorManager {
         let gradient=-(mouse_pos.0 - satellite_pos.0)/(mouse_pos.1 - satellite_pos.1);
         let angle=gradient.atan()*180./PI;
         self.satellite.set_angle(angle);
+
+        // If two meteors collide, their speed gets set to the same one
+        for i in 1..self.meteors.len(){
+            let (first, second)=self.meteors.split_at_mut(i);
+            let mut meteor=first.last_mut().unwrap();
+            for other_meteor in second.iter_mut(){
+                if meteor.is_colliding_with_circle(other_meteor){
+                    meteor.set_speed_to_lowest(other_meteor);
+                }
+            }
+        }
 
         // For now, when a meteor and a projectile collide, the destroy each other
         let mut pellets: Vec<Projectile>=Vec::new();
@@ -141,7 +151,7 @@ impl ActorManager {
 
         // Move each meteor according to speed
         for meteor in self.meteors.iter_mut(){
-            meteor.move_by_speed();
+            meteor.step();
         }
 
         // Drop projectiles that flew outside the screen

@@ -1,3 +1,4 @@
+use std::f64::consts::PI;
 use sdl2;
 use textures;
 use sdl2::render::TextureQuery;
@@ -22,11 +23,17 @@ impl Projectile {
         let TextureQuery{width,height,..}=textures.projectiles[kind.get_ptexture_i()].query();
         let speed=kind.get_speed();
 
+        let angle=if kind==ProjectileKind::P01{
+            0.
+        } else{
+            360.-(-velocity.1).atan2(velocity.0)*(180./PI)
+        };
+
         Projectile{
             pos: (0.,0.),
             width: width,
             height: height,
-            angle: 0.,
+            angle: angle,
             speed: (speed*velocity.0,speed*velocity.1),
             kind}
     }
@@ -65,3 +72,7 @@ impl Actor for Projectile {
         self.speed
     }
 }
+
+
+// (0.8717454193280995, -0.48995910429389533), 29.337893654673955
+// (-0.8579458929422961, -0.5137400556540694), -30.913275682128514

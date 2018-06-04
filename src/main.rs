@@ -28,8 +28,8 @@ fn main() {
 
     let window = video.window("Some Title", SCREEN_WIDTH, SCREEN_HEIGHT)
     .position_centered()
-    .fullscreen()
-    // .opengl()
+    // .fullscreen()
+    .opengl()
     .build()
     .unwrap();
 

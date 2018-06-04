@@ -13,12 +13,13 @@ pub const OUT_OF_SCREEN_Y_F64: f64 = SCREEN_HEIGHT_F64+10000.;
 pub const SHIP_EPSILON: f64 = 2.;
 
 pub const SHIP_SPEED: f64 = 4.;
+pub const SHIP_WITH_SHIELD_SPEED: f64 = 2.5;
 
 pub const ENERGY_RECOVERY_PER_FRAME: f64 = 0.002;
 pub const COOLDOWN_FRAMES: isize = 10;
 
-pub const TRIPLE_SHOT_DURATION_FRAMES: isize = (FPS as isize)*12;
-pub const SHIELD_DURATION_FRAMES: isize = (FPS as isize)*5;
+pub const TRIPLE_SHOT_DURATION_FRAMES: isize = (FPS as isize)*20;
+pub const SHIELD_DURATION_FRAMES: isize = (FPS as isize)*10;
 
 pub const SHIELD_ENERGY_COST: f64 = 0.5;
 pub const TRIPLE_SHOT_ENERGY_COST: f64 = 1.0;
@@ -78,6 +79,47 @@ impl ProjectileKind {
             &ProjectileKind::P01 => 0.05,
             &ProjectileKind::P02 => 0.25,
             &ProjectileKind::P03 => panic!(),
+        }
+    }
+}
+
+#[derive(PartialEq, Clone, Copy)]
+pub enum MeteorKind {
+    M01,
+    M02,
+    M03,
+}
+
+impl MeteorKind {
+    pub fn get_mtexture_i(&self) -> usize{
+        match self {
+            &MeteorKind::M01 => 0,
+            &MeteorKind::M02 => 1,
+            &MeteorKind::M03 => 2,
+        }
+    }
+
+    pub fn get_speed(&self) -> f64{
+        match self {
+            &MeteorKind::M01 => 1.,
+            &MeteorKind::M02 => 1.75,
+            &MeteorKind::M03 => 0.25,
+        }
+    }
+
+    pub fn get_max_hp(&self) -> f64{
+        match self {
+            &MeteorKind::M01 => 50.,
+            &MeteorKind::M02 => 30.,
+            &MeteorKind::M03 => 150.,
+        }
+    }
+
+    pub fn get_rotation(&self) -> f64{
+        match self {
+            &MeteorKind::M01 => 0.,
+            &MeteorKind::M02 => 0.,
+            &MeteorKind::M03 => 0.5,
         }
     }
 }
